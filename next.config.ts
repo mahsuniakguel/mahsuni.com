@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
     agentFeedback: true,
   },
   cacheComponents: true,
+  // The chat endpoint reads this file at request time.
+  outputFileTracingIncludes: {
+    "/api/chat": ["./content/profile.md"],
+  },
   partialPrefetching: true,
   turbopack: {
     rules: {

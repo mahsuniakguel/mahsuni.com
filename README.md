@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# mahsuni.com
 
-## Getting Started
+A one-screen personal site: an introduction, the projects I'm building, and a small chat that answers questions about me.
 
-First, run the development server:
+## Run it
 
 ```bash
+cp .env.example .env.local   # add a free CHAT_API_KEY from https://console.groq.com/keys
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Without a key the site works and the chat shows a setup note instead of pretending to answer.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Edit content
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| What | Where |
+| --- | --- |
+| Name, tagline, chat copy, example questions | `content/site.ts` |
+| Projects | `content/projects.ts` (images go in `public/projects/`) |
+| Social links | `content/socials.ts` |
+| What the chat knows about me | `content/profile.md` |
+| How the chat behaves | `lib/chat/system-prompt.ts` |
 
-## Learn More
+Everything outside HTML comments in `profile.md` is public: it's sent to the model and may be quoted to any visitor.
 
-To learn more about Next.js, take a look at the following resources:
+## Chat provider
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The chat calls any OpenAI-compatible API from a server route (`app/api/chat/route.ts`), so the key never reaches the browser. Groq is the default; switch with environment variables:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Provider | Settings |
+| --- | --- |
+| Groq (default) | `CHAT_API_KEY` |
+| Google Gemini | `CHAT_PROVIDER=gemini`, `CHAT_MODEL=<model id>` |
+| OpenRouter | `CHAT_PROVIDER=openrouter`, `CHAT_MODEL=<model id>:free` |
+| Anything else | `CHAT_BASE_URL=<…/v1>`, `CHAT_MODEL=<model id>` |
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Set the same variables in your host's dashboard before deploying. The homepage is static, so redeploy after changing them.

@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
+/* Short screens get tighter spacing so the page still fits on one screen. */
+@custom-variant short (@media (max-height: 720px));
+
+/*
+  Night sea. A warm charcoal sky over cool, deep water, split by one horizon.
+  Text is the colour of moonlight; sea glass is used only for focus and "live".
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --sky: #1b1a18;
+  --sea: #0f1518;
+  --surface: #22211e;
+  --ink: #ece6da;
+  --muted: #a39e94;
+  --faint: #75716a;
+  --line: rgb(236 230 218 / 0.1);
+  --glass: #9cc4b7;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-sky: var(--sky);
+  --color-sea: var(--sea);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-glass: var(--glass);
+  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--sky);
+  }
+
+  body {
+    background: var(--sky);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  ::selection {
+    background: rgb(156 196 183 / 0.3);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--glass);
+    outline-offset: 3px;
+    border-radius: 4px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Lines up content with the page column while letting rows bleed to the edge. */
+.gutter {
+  --gutter: max(1.25rem, calc((100vw - 68rem) / 2));
+  padding-inline: var(--gutter);
+}
+
+/* Project cards shrink on small and short screens so everything fits. */
+.card-size {
+  --card-w: 15rem;
+  --card-h: 10.5rem;
+}
+@media (min-width: 640px) {
+  .card-size {
+    --card-w: 18rem;
+    --card-h: 12rem;
+  }
+}
+@media (min-width: 640px) and (max-height: 760px) {
+  .card-size {
+    --card-h: 10.5rem;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }
