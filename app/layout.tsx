@@ -1,16 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Hanken_Grotesk, Newsreader } from "next/font/google";
+import { Instrument_Sans } from "next/font/google";
 import { site } from "@/content/site";
 import "./globals.css";
 
-const newsreader = Newsreader({
-  variable: "--font-newsreader",
-  subsets: ["latin", "latin-ext"],
-  axes: ["opsz"],
-});
-
-const hanken = Hanken_Grotesk({
-  variable: "--font-hanken",
+const instrument = Instrument_Sans({
+  variable: "--font-instrument",
   subsets: ["latin", "latin-ext"],
 });
 
@@ -40,7 +34,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${newsreader.variable} ${hanken.variable} antialiased`}>
+    <html lang="en" className={`${instrument.variable} antialiased`}>
       <body>{children}</body>
     </html>
   );

@@ -27,8 +27,7 @@
   --color-faint: var(--faint);
   --color-line: var(--line);
   --color-glass: var(--glass);
-  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
-  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -41,7 +40,7 @@
     background: var(--sky);
     color: var(--ink);
     font-family: var(--font-sans);
-    font-feature-settings: "ss01", "cv11";
+    text-rendering: optimizeLegibility;
   }
 
   ::selection {

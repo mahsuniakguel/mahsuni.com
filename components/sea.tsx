@@ -2,17 +2,55 @@
 
 import { useEffect, useRef } from "react";
 
-const SEA = "#0f1518";
-const LINES = 18;
-const STEP = 6;
-const FRAME_MS = 1000 / 30;
+const SKY_TOP = "#1b1a18";
+const SKY_HAZE = "#201f1c";
+const SEA_FAR = "#141b1f";
+const SEA_NEAR = "#0b1013";
+const LIGHT = "240 234 222";
+// Where the moon and its reflection sit, as a fraction of the width.
+const PATH_X = 0.7;
+const SWELLS = 11;
 
-function wave(alpha: number) {
-  return `rgb(206 220 216 / ${alpha.toFixed(3)})`;
+type Glint = {
+  p: number; // depth, 0 at the horizon and 1 at the bottom of the screen
+  offset: number; // distance from the light path, in path half-widths
+  size: number;
+  phase: number;
+  speed: number;
+  cycle: number;
+};
+
+function gaussian() {
+  let u = 0;
+  while (!u) u = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * Math.random());
 }
 
-// Draws the sea below the element with id `horizonId`: slow wave lines in
-// perspective, brighter along a path of moonlight. Purely decorative.
+function place(g: Glint) {
+  g.p = Math.pow(Math.random(), 1.35);
+  g.offset = gaussian() * 0.85;
+  g.size = 0.6 + Math.random() * 0.8;
+}
+
+function createGlint(): Glint {
+  const g = {
+    p: 0,
+    offset: 0,
+    size: 0,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.7 + Math.random() * 1.5,
+    cycle: -1,
+  };
+  place(g);
+  return g;
+}
+
+function light(alpha: number) {
+  return `rgb(${LIGHT} / ${Math.max(0, alpha).toFixed(3)})`;
+}
+
+// Draws the night sea below the element with id `horizonId`: slow swells and
+// moonlight glinting on the water. Purely decorative.
 export function Sea({ horizonId }: { horizonId: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -22,89 +60,181 @@ export function Sea({ horizonId }: { horizonId: string }) {
     const ctx = canvas?.getContext("2d");
     if (!canvas || !parent || !ctx) return;
 
+    // Sky, moon, and water don't move, so they're painted once per layout.
+    const backdrop = document.createElement("canvas");
+    const bctx = backdrop.getContext("2d");
+    if (!bctx) return;
+
     const motion = window.matchMedia("(prefers-reduced-motion: no-preference)");
     let width = 0;
     let height = 0;
+    let dpr = 1;
+    let horizon = -1;
+    let glints: Glint[] = [];
     let raf = 0;
     let last = 0;
-    let time = Math.random() * 100;
+    let time = 20 + Math.random() * 100;
+
+    const depthY = (p: number) => horizon + (height - horizon) * Math.pow(p, 1.6);
+    // Half-width of the path of moonlight; it widens towards the viewer.
+    const pathHalfWidth = (p: number) => 4 + p * Math.max(width, 640) * 0.07;
+
+    const swell = (x: number, p: number, seed: number) => {
+      const amp = 0.4 + 6 * p * p;
+      const k = 0.01 / (0.3 + p);
+      return (
+        amp *
+        (0.6 * Math.sin(x * k + time * (0.35 + 0.4 * p) + seed * 1.7) +
+          0.4 * Math.sin(x * k * 2.1 - time * (0.5 + 0.3 * p) + seed * 0.9))
+      );
+    };
+
+    const paintBackdrop = () => {
+      backdrop.width = canvas.width;
+      backdrop.height = canvas.height;
+      const b = bctx;
+      b.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const sky = b.createLinearGradient(0, 0, 0, horizon);
+      sky.addColorStop(0, SKY_TOP);
+      sky.addColorStop(1, SKY_HAZE);
+      b.fillStyle = sky;
+      b.fillRect(0, 0, width, horizon);
+
+      const sea = b.createLinearGradient(0, horizon, 0, height);
+      sea.addColorStop(0, SEA_FAR);
+      sea.addColorStop(1, SEA_NEAR);
+      b.fillStyle = sea;
+      b.fillRect(0, horizon, width, height - horizon);
+
+      // Haze where the moonlight meets the horizon.
+      const mx = width * PATH_X;
+      const rx = Math.max(width * 0.28, 220);
+      b.save();
+      b.translate(mx, horizon);
+      b.scale(1, 0.16);
+      const haze = b.createRadialGradient(0, 0, 0, 0, 0, rx);
+      haze.addColorStop(0, light(0.07));
+      haze.addColorStop(0.4, light(0.025));
+      haze.addColorStop(1, light(0));
+      b.fillStyle = haze;
+      b.fillRect(-rx, -rx, rx * 2, rx * 2);
+      b.restore();
+
+      // A faint, steady column of reflected light that the glints sparkle on.
+      for (let y = Math.ceil(horizon); y < height; y += 2) {
+        const p = Math.pow((y - horizon) / (height - horizon), 1 / 1.6);
+        const hw = pathHalfWidth(p) * 1.6;
+        const column = b.createLinearGradient(mx - hw, 0, mx + hw, 0);
+        const a = 0.045 * (1 - 0.55 * p);
+        column.addColorStop(0, light(0));
+        column.addColorStop(0.5, light(a));
+        column.addColorStop(1, light(0));
+        b.fillStyle = column;
+        b.fillRect(mx - hw, y, hw * 2, 2);
+      }
+
+      // The moon, where there's room for it beside the text.
+      if (width >= 640 && horizon > 180) {
+        const my = horizon * 0.34;
+        const glow = b.createRadialGradient(mx, my, 0, mx, my, 120);
+        glow.addColorStop(0, light(0.1));
+        glow.addColorStop(0.07, light(0.07));
+        glow.addColorStop(0.2, light(0.028));
+        glow.addColorStop(0.5, light(0.008));
+        glow.addColorStop(1, light(0));
+        b.fillStyle = glow;
+        b.fillRect(mx - 120, my - 120, 240, 240);
+
+        const disc = b.createRadialGradient(mx - 2, my - 2, 0, mx, my, 7.5);
+        disc.addColorStop(0, light(0.98));
+        disc.addColorStop(1, light(0.82));
+        b.fillStyle = disc;
+        b.beginPath();
+        b.arc(mx, my, 7.5, 0, Math.PI * 2);
+        b.fill();
+      }
+    };
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
       width = parent.clientWidth;
       height = parent.clientHeight;
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    const horizonY = () => {
-      const anchor = document.getElementById(horizonId);
-      if (!anchor) return height * 0.55;
-      const a = anchor.getBoundingClientRect();
-      return a.top - parent.getBoundingClientRect().top;
+      const count = Math.round(Math.min(Math.max(width * 0.24, 110), 380));
+      glints = Array.from({ length: count }, createGlint);
+      horizon = -1;
     };
 
     const draw = () => {
-      const horizon = horizonY();
-      const depth = height - horizon;
-      ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = SEA;
-      ctx.fillRect(0, horizon, width, depth);
-      ctx.lineWidth = 1;
-
-      const glint = 0.7;
-
-      // A small moon above the light path, where there's room for it.
-      if (width >= 640 && horizon > 160) {
-        const mx = width * glint;
-        const my = horizon * 0.34;
-        const halo = ctx.createRadialGradient(mx, my, 0, mx, my, 64);
-        halo.addColorStop(0, "rgb(236 230 218 / 0.06)");
-        halo.addColorStop(1, "rgb(236 230 218 / 0)");
-        ctx.fillStyle = halo;
-        ctx.fillRect(mx - 64, my - 64, 128, 128);
-        ctx.fillStyle = "rgb(236 230 218 / 0.85)";
-        ctx.beginPath();
-        ctx.arc(mx, my, 9, 0, Math.PI * 2);
-        ctx.fill();
+      const anchor = document.getElementById(horizonId);
+      const top = anchor
+        ? anchor.getBoundingClientRect().top - parent.getBoundingClientRect().top
+        : height * 0.55;
+      if (Math.abs(top - horizon) > 0.5) {
+        horizon = top;
+        paintBackdrop();
       }
 
-      for (let i = 1; i <= LINES; i++) {
-        const p = i / LINES;
-        const y0 = horizon + depth * Math.pow(p, 1.65);
-        const amp = 0.5 + 8 * p * p;
-        const k = 0.011 / (0.3 + p);
-        const alpha = 0.04 + 0.11 * p;
-        const spread = 0.03 + 0.14 * p;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.drawImage(backdrop, 0, 0);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+      const mx = width * PATH_X;
+      const hair = dpr >= 2 ? 0.75 : 1;
+
+      // Swells: brightest along the light path, almost gone at the edges.
+      ctx.lineWidth = hair;
+      for (let i = 1; i <= SWELLS; i++) {
+        const p = i / (SWELLS + 1);
+        const y0 = depthY(p);
+        const peak = 0.05 + 0.1 * p;
         const g = ctx.createLinearGradient(0, 0, width, 0);
-        g.addColorStop(0, wave(alpha * 0.5));
-        g.addColorStop(Math.max(0, glint - spread * 2.5), wave(alpha));
-        g.addColorStop(glint, wave(Math.min(alpha * 2.8, 0.42)));
-        g.addColorStop(Math.min(1, glint + spread * 2.5), wave(alpha));
-        g.addColorStop(1, wave(alpha * 0.6));
+        g.addColorStop(0, light(peak * 0.12));
+        g.addColorStop(Math.max(0, PATH_X - 0.32), light(peak * 0.35));
+        g.addColorStop(PATH_X, light(peak));
+        g.addColorStop(Math.min(1, PATH_X + 0.24), light(peak * 0.35));
+        g.addColorStop(1, light(peak * 0.15));
         ctx.strokeStyle = g;
-
         ctx.beginPath();
-        for (let x = 0; x <= width + STEP; x += STEP) {
-          const y =
-            y0 +
-            amp *
-              (0.62 * Math.sin(x * k + time * (0.5 + p * 0.6) + i * 1.7) +
-                0.38 * Math.sin(x * k * 2.3 - time * (0.8 + p * 0.4) + i * 0.9));
+        for (let x = 0; x <= width + 8; x += 8) {
+          const y = y0 + swell(x, p, i);
           if (x === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
         }
+        ctx.stroke();
+      }
+
+      // Glints: short flashes of moonlight that reappear somewhere new each time.
+      ctx.lineCap = "round";
+      for (const g of glints) {
+        const s = time * g.speed + g.phase;
+        const cycle = Math.floor(s / (Math.PI * 2));
+        if (cycle !== g.cycle) {
+          if (g.cycle !== -1) place(g);
+          g.cycle = cycle;
+        }
+        const wave = Math.sin(s);
+        if (wave <= 0) continue;
+
+        const x = mx + g.offset * pathHalfWidth(g.p);
+        const y = depthY(g.p) + swell(x, g.p, g.phase);
+        const len = (1 + g.p * g.p * 14) * g.size;
+        const nearPath = Math.exp(-g.offset * g.offset * 0.7);
+
+        ctx.strokeStyle = light(Math.pow(wave, 4) * (0.1 + 0.6 * nearPath));
+        ctx.lineWidth = g.p > 0.6 ? 1.1 : hair;
+        ctx.beginPath();
+        ctx.moveTo(x - len / 2, y);
+        ctx.lineTo(x + len / 2, y);
         ctx.stroke();
       }
     };
 
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
-      const elapsed = now - last;
-      if (elapsed < FRAME_MS) return;
-      time += Math.min(elapsed, 100) / 1000 * 0.4;
+      time += Math.min(now - last, 100) / 1000;
       last = now;
       draw();
     };

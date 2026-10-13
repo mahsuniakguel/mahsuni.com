@@ -222,7 +222,7 @@ export function Chat({
                 ) : (
                   <p
                     key={m.id}
-                    className="font-serif text-[1.0625rem] leading-relaxed break-words whitespace-pre-wrap text-ink/90"
+                    className="text-[0.9375rem] leading-relaxed break-words whitespace-pre-wrap text-ink/90"
                   >
                     {m.content}
                   </p>
@@ -245,7 +245,7 @@ export function Chat({
           </div>
         )}
 
-        <h2 id={titleId} className="font-serif text-lg tracking-[-0.01em] sm:text-xl">
+        <h2 id={titleId} className="text-[0.9375rem] font-medium tracking-[-0.015em] sm:text-base">
           {title}
         </h2>
 
@@ -279,7 +279,7 @@ export function Chat({
             <button
               type="submit"
               disabled={!enabled || !input.trim()}
-              className="rounded-lg bg-ink px-3.5 py-2 text-sm font-medium text-sky transition-colors hover:bg-white disabled:bg-ink/[0.08] disabled:text-faint"
+              className="rounded-lg bg-ink px-3.5 py-2 text-sm font-medium text-sky transition-colors hover:bg-white disabled:bg-transparent disabled:text-faint"
             >
               Ask
             </button>

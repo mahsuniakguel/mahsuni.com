@@ -100,7 +100,7 @@ export function ProjectRail({
       </div>
 
       <div className="relative mt-3">
-        <div id={horizonId} aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-ink/15" />
+        <div id={horizonId} aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-[linear-gradient(90deg,rgb(236_230_218/0.08),rgb(236_230_218/0.16)_45%,rgb(236_230_218/0.34)_70%,rgb(236_230_218/0.14)_90%,rgb(236_230_218/0.08))]" />
         <ul
           ref={listRef}
           className="gutter no-scrollbar relative flex snap-x snap-mandatory gap-3 overflow-x-auto py-1.5 sm:gap-4"

@@ -17,10 +17,10 @@ export default function Home() {
       <Sea horizonId={HORIZON_ID} />
 
       <header className="gutter flex flex-1 flex-col justify-center py-8 short:py-5">
-        <h1 className="font-serif text-[clamp(2.5rem,min(6.5vw,9dvh),4.75rem)] leading-[0.95] tracking-[-0.03em]">
+        <h1 className="text-[clamp(2.25rem,min(6vw,8.5dvh),4.25rem)] leading-none font-medium tracking-[-0.045em]">
           {site.name}
         </h1>
-        <p className="mt-4 max-w-[36ch] text-[1.0625rem] leading-relaxed text-muted sm:mt-5 sm:text-lg short:mt-3">
+        <p className="mt-4 max-w-[38ch] text-base leading-relaxed text-pretty tracking-[-0.005em] text-muted sm:mt-5 sm:text-[1.0625rem] short:mt-3">
           {site.tagline}
         </p>
         {socials.length > 0 && (
