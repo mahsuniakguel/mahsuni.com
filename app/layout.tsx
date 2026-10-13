@@ -1,11 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Sans } from "next/font/google";
+import { Instrument_Sans, Inter } from "next/font/google";
 import { site } from "@/content/site";
 import "./globals.css";
 
 const instrument = Instrument_Sans({
   variable: "--font-instrument",
   subsets: ["latin", "latin-ext"],
+});
+
+// Fallback for the heading where SF Pro isn't available, so it isn't preloaded.
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "latin-ext"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -34,7 +41,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${instrument.variable} antialiased`}>
+    <html lang="en" className={`${instrument.variable} ${inter.variable} antialiased`}>
       <body>{children}</body>
     </html>
   );

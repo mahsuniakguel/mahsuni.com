@@ -28,6 +28,8 @@
   --color-line: var(--line);
   --color-glass: var(--glass);
   --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  /* SF Pro on Apple devices, Inter everywhere else. */
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-inter), ui-sans-serif, sans-serif;
 }
 
 @layer base {

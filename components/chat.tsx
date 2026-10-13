@@ -174,7 +174,7 @@ export function Chat({
 
   return (
     <section aria-labelledby={titleId} className="gutter relative" onKeyDown={onKeyDown}>
-      <div className="relative max-w-[40rem]">
+      <div data-sea-avoid className="relative max-w-[40rem]">
         {showPanel && (
           <div
             id={panelId}

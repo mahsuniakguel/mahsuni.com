@@ -17,8 +17,8 @@ export default function Home() {
       <Sea horizonId={HORIZON_ID} />
 
       <header className="gutter flex flex-1 flex-col justify-center py-8 short:py-5">
-        <h1 className="text-[clamp(2.25rem,min(6vw,8.5dvh),4.25rem)] leading-none font-medium tracking-[-0.045em]">
-          {site.name}
+        <h1 className="font-display text-[clamp(2rem,min(4.8vw,7dvh),3.5rem)] leading-none font-bold tracking-[-0.03em]">
+          {site.greeting}
         </h1>
         <p className="mt-4 max-w-[38ch] text-base leading-relaxed text-pretty tracking-[-0.005em] text-muted sm:mt-5 sm:text-[1.0625rem] short:mt-3">
           {site.tagline}

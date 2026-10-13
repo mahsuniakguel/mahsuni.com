@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { boatBounds, drawBoat } from "./sea-boat";
 
 const SKY_TOP = "#1b1a18";
 const SKY_HAZE = "#201f1c";
@@ -71,6 +72,7 @@ export function Sea({ horizonId }: { horizonId: string }) {
     let dpr = 1;
     let horizon = -1;
     let glints: Glint[] = [];
+    let boat: { x: number; y: number; p: number; scale: number } | null = null;
     let raf = 0;
     let last = 0;
     let time = 20 + Math.random() * 100;
@@ -156,6 +158,38 @@ export function Sea({ horizonId }: { horizonId: string }) {
       }
     };
 
+    // The boat sits on the light path in the open water below the projects,
+    // and only where it won't touch anything marked data-sea-avoid.
+    const placeBoat = () => {
+      boat = null;
+      const rail = document.getElementById(horizonId)?.parentElement;
+      if (!rail || width < 900) return;
+
+      const origin = parent.getBoundingClientRect().top;
+      const railBottom = rail.getBoundingClientRect().bottom - origin;
+      const scale = Math.min(Math.max(width / 1440, 0.8), 1.15);
+      const x = width * (PATH_X + 0.12);
+      const rise = -boatBounds(0, 0, scale).top;
+      const free = height - railBottom - rise - 24;
+      if (free < 24) return;
+
+      const y = railBottom + 12 + rise + free * 0.15;
+      const b = boatBounds(x, y, scale);
+      for (const el of document.querySelectorAll("[data-sea-avoid]")) {
+        const r = el.getBoundingClientRect();
+        if (
+          r.left - 32 < b.right &&
+          r.right + 32 > b.left &&
+          r.top - origin - 16 < b.bottom &&
+          r.bottom - origin + 16 > b.top
+        ) {
+          return;
+        }
+      }
+      const p = Math.pow((y - horizon) / (height - horizon), 1 / 1.6);
+      boat = { x, y, p, scale };
+    };
+
     const resize = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       width = parent.clientWidth;
@@ -175,6 +209,7 @@ export function Sea({ horizonId }: { horizonId: string }) {
       if (Math.abs(top - horizon) > 0.5) {
         horizon = top;
         paintBackdrop();
+        placeBoat();
       }
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -229,6 +264,16 @@ export function Sea({ horizonId }: { horizonId: string }) {
         ctx.moveTo(x - len / 2, y);
         ctx.lineTo(x + len / 2, y);
         ctx.stroke();
+      }
+
+      // The boat rides the same swell as the water around it.
+      if (boat) {
+        const { x, y, p, scale } = boat;
+        const reach = 26 * scale;
+        const lift = 0.8 * swell(x, p, 3) + 1.2 * Math.sin(time * 0.8);
+        const slope = (swell(x + reach, p, 3) - swell(x - reach, p, 3)) / (2 * reach);
+        const roll = 0.9 * Math.atan(slope) + 0.022 * Math.sin(time * 0.65 + 1);
+        drawBoat(ctx, { x, y: y + lift, scale, roll, time });
       }
     };
 

@@ -2,6 +2,8 @@
 export const site = {
   name: "Mahsuni Akgul",
   url: "https://mahsuni.com",
+  // The large heading on the homepage.
+  greeting: "hi I'm mahsuni.",
   tagline:
     "I build software and products, think a lot about AI and design, and try to make things that leave the world a little better.",
   // Shown to search engines and in link previews.
