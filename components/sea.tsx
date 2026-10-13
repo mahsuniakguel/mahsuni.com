@@ -5,6 +5,8 @@ import { boatBounds, drawBoat } from "./sea-boat";
 
 const SKY_TOP = "#1b1a18";
 const SKY_HAZE = "#201f1c";
+// Far water takes on the colour of the sky, so there's no hard horizon.
+const SEA_HORIZON = "#1e1e1c";
 const SEA_FAR = "#141b1f";
 const SEA_NEAR = "#0b1013";
 const LIGHT = "240 234 222";
@@ -104,10 +106,20 @@ export function Sea({ horizonId }: { horizonId: string }) {
       b.fillRect(0, 0, width, horizon);
 
       const sea = b.createLinearGradient(0, horizon, 0, height);
-      sea.addColorStop(0, SEA_FAR);
+      sea.addColorStop(0, SEA_HORIZON);
+      sea.addColorStop(0.22, SEA_FAR);
       sea.addColorStop(1, SEA_NEAR);
       b.fillStyle = sea;
       b.fillRect(0, horizon, width, height - horizon);
+
+      // A thin band of haze that blurs where sea and sky meet.
+      const band = 46;
+      const mist = b.createLinearGradient(0, horizon - band, 0, horizon + band);
+      mist.addColorStop(0, light(0));
+      mist.addColorStop(0.5, light(0.018));
+      mist.addColorStop(1, light(0));
+      b.fillStyle = mist;
+      b.fillRect(0, horizon - band, width, band * 2);
 
       // Haze where the moonlight meets the horizon.
       const mx = width * PATH_X;
@@ -224,7 +236,7 @@ export function Sea({ horizonId }: { horizonId: string }) {
       for (let i = 1; i <= SWELLS; i++) {
         const p = i / (SWELLS + 1);
         const y0 = depthY(p);
-        const peak = 0.05 + 0.1 * p;
+        const peak = (0.05 + 0.1 * p) * Math.min(1, p * 4);
         const g = ctx.createLinearGradient(0, 0, width, 0);
         g.addColorStop(0, light(peak * 0.12));
         g.addColorStop(Math.max(0, PATH_X - 0.32), light(peak * 0.35));
@@ -258,7 +270,8 @@ export function Sea({ horizonId }: { horizonId: string }) {
         const len = (1 + g.p * g.p * 14) * g.size;
         const nearPath = Math.exp(-g.offset * g.offset * 0.7);
 
-        ctx.strokeStyle = light(Math.pow(wave, 4) * (0.1 + 0.6 * nearPath));
+        const distance = Math.min(1, 0.25 + g.p * 5);
+        ctx.strokeStyle = light(Math.pow(wave, 4) * (0.1 + 0.6 * nearPath) * distance);
         ctx.lineWidth = g.p > 0.6 ? 1.1 : hair;
         ctx.beginPath();
         ctx.moveTo(x - len / 2, y);
