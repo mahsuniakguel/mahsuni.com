@@ -4,7 +4,7 @@
 const WOOD = "#1f1812";
 const PLANK = "#2c2219";
 const INSIDE = "#130f0c";
-const FIGURE = "#0b0e10";
+const FIGURE = "#020304";
 const WATER = "rgb(11 16 19 / 0.9)";
 
 function light(alpha: number) {
@@ -164,10 +164,21 @@ export function drawBoat(ctx: CanvasRenderingContext2D, pose: BoatPose) {
   ctx.stroke();
 
   // The fisher, with an arm reaching out to the rod.
+  // A faint outline keeps the silhouette readable against dark water.
   ctx.fillStyle = FIGURE;
   ctx.fill(figure);
+  ctx.strokeStyle = light(0.07);
+  ctx.lineWidth = 0.8;
+  ctx.stroke(figure);
   ctx.fill(head);
   ctx.fill(cap);
+  ctx.beginPath();
+  ctx.ellipse(-7.2, -48.2, 5.6, 6.2, 0.12, -0.2, 0.9);
+  ctx.moveTo(-7.2 + 5.6 * Math.cos(Math.PI - 0.9), -48.2 + 6.2 * Math.sin(Math.PI - 0.9));
+  ctx.ellipse(-7.2, -48.2, 5.6, 6.2, 0.12, Math.PI - 0.9, Math.PI + 0.2);
+  ctx.moveTo(-13.2, -50);
+  ctx.ellipse(-7, -50, 6.2, 5.4, 0.12, Math.PI, Math.PI * 2);
+  ctx.stroke();
   ctx.strokeStyle = FIGURE;
   ctx.lineWidth = 4.4;
   ctx.beginPath();
@@ -176,12 +187,12 @@ export function drawBoat(ctx: CanvasRenderingContext2D, pose: BoatPose) {
   ctx.stroke();
 
   // Moonlight on the cap, shoulders, and arm.
-  ctx.strokeStyle = light(0.28);
+  ctx.strokeStyle = light(0.4);
   ctx.lineWidth = 0.9;
   ctx.beginPath();
   ctx.ellipse(-7, -50, 6.2, 5.4, 0.12, Math.PI * 1.12, Math.PI * 1.88);
   ctx.stroke();
-  ctx.strokeStyle = light(0.15);
+  ctx.strokeStyle = light(0.26);
   ctx.lineWidth = 0.8;
   ctx.stroke(back);
   ctx.beginPath();

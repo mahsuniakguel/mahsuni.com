@@ -3,16 +3,36 @@
 import { useEffect, useRef } from "react";
 import { boatBounds, drawBoat } from "./sea-boat";
 
-const SKY_TOP = "#1b1a18";
-const SKY_HAZE = "#201f1c";
+const SKY_TOP = "#06080b";
+const SKY_HAZE = "#121821";
 // Far water takes on the colour of the sky, so there's no hard horizon.
-const SEA_HORIZON = "#1e1e1c";
-const SEA_FAR = "#141b1f";
-const SEA_NEAR = "#0b1013";
+const SEA_HORIZON = "#111720";
+const SEA_FAR = "#0c1218";
+const SEA_NEAR = "#05080b";
 const LIGHT = "240 234 222";
 // Where the moon and its reflection sit, as a fraction of the width.
 const PATH_X = 0.7;
 const SWELLS = 11;
+
+type Star = {
+  u: number; // horizontal position, 0–1
+  v: number; // height above the horizon, 0 at the top of the sky and 1 at the horizon
+  r: number;
+  alpha: number;
+  speed: number;
+  phase: number;
+};
+
+function createStar(): Star {
+  return {
+    u: Math.random(),
+    v: Math.random(),
+    r: 0.4 + Math.pow(Math.random(), 4) * 0.8,
+    alpha: 0.18 + Math.pow(Math.random(), 2.5) * 0.6,
+    speed: 0.2 + Math.random() * 0.6,
+    phase: Math.random() * Math.PI * 2,
+  };
+}
 
 type Glint = {
   p: number; // depth, 0 at the horizon and 1 at the bottom of the screen
@@ -74,6 +94,9 @@ export function Sea({ horizonId }: { horizonId: string }) {
     let dpr = 1;
     let horizon = -1;
     let glints: Glint[] = [];
+    let stars: Star[] = [];
+    // Content the scene keeps clear of: no stars behind text, no boat over it.
+    let avoid: { left: number; right: number; top: number; bottom: number }[] = [];
     let boat: { x: number; y: number; p: number; scale: number } | null = null;
     let raf = 0;
     let last = 0;
@@ -170,14 +193,25 @@ export function Sea({ horizonId }: { horizonId: string }) {
       }
     };
 
-    // The boat sits on the light path in the open water below the projects,
-    // and only where it won't touch anything marked data-sea-avoid.
-    const placeBoat = () => {
+    // Measures content marked data-sea-avoid, then places the boat in the open
+    // water below the projects, where it won't touch any of it.
+    const measureLayout = () => {
+      const frame = parent.getBoundingClientRect();
+      avoid = [...document.querySelectorAll("[data-sea-avoid]")].map((el) => {
+        const r = el.getBoundingClientRect();
+        return {
+          left: r.left - frame.left,
+          right: r.right - frame.left,
+          top: r.top - frame.top,
+          bottom: r.bottom - frame.top,
+        };
+      });
+
       boat = null;
       const rail = document.getElementById(horizonId)?.parentElement;
       if (!rail || width < 900) return;
 
-      const origin = parent.getBoundingClientRect().top;
+      const origin = frame.top;
       const railBottom = rail.getBoundingClientRect().bottom - origin;
       const scale = Math.min(Math.max(width / 1440, 0.8), 1.15);
       const x = width * (PATH_X + 0.12);
@@ -187,14 +221,8 @@ export function Sea({ horizonId }: { horizonId: string }) {
 
       const y = railBottom + 12 + rise + free * 0.15;
       const b = boatBounds(x, y, scale);
-      for (const el of document.querySelectorAll("[data-sea-avoid]")) {
-        const r = el.getBoundingClientRect();
-        if (
-          r.left - 32 < b.right &&
-          r.right + 32 > b.left &&
-          r.top - origin - 16 < b.bottom &&
-          r.bottom - origin + 16 > b.top
-        ) {
+      for (const r of avoid) {
+        if (r.left - 32 < b.right && r.right + 32 > b.left && r.top - 16 < b.bottom && r.bottom + 16 > b.top) {
           return;
         }
       }
@@ -210,6 +238,8 @@ export function Sea({ horizonId }: { horizonId: string }) {
       canvas.height = Math.round(height * dpr);
       const count = Math.round(Math.min(Math.max(width * 0.24, 110), 380));
       glints = Array.from({ length: count }, createGlint);
+      const starCount = Math.round(Math.min(Math.max((width * height) / 14000, 40), 120));
+      stars = Array.from({ length: starCount }, createStar);
       horizon = -1;
     };
 
@@ -221,7 +251,7 @@ export function Sea({ horizonId }: { horizonId: string }) {
       if (Math.abs(top - horizon) > 0.5) {
         horizon = top;
         paintBackdrop();
-        placeBoat();
+        measureLayout();
       }
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -230,6 +260,26 @@ export function Sea({ horizonId }: { horizonId: string }) {
 
       const mx = width * PATH_X;
       const hair = dpr >= 2 ? 0.75 : 1;
+
+      // Stars: sparse and faint, fading into the haze and around the moon.
+      const moonY = horizon * 0.34;
+      for (const star of stars) {
+        const x = star.u * width;
+        const y = star.v * horizon * 0.94;
+        if (avoid.some((r) => x > r.left - 10 && x < r.right + 10 && y > r.top - 10 && y < r.bottom + 10)) {
+          continue;
+        }
+        const fromMoon = Math.hypot(x - mx, y - moonY);
+        const haze = Math.min(1, (horizon - y) / (horizon * 0.4));
+        const moonlight = Math.min(1, Math.max(0, (fromMoon - 40) / 120));
+        const twinkle = 1 - 0.3 * (0.5 + 0.5 * Math.sin(time * star.speed + star.phase));
+        const alpha = star.alpha * haze * moonlight * twinkle;
+        if (alpha < 0.02) continue;
+        ctx.fillStyle = light(alpha);
+        ctx.beginPath();
+        ctx.arc(x, y, star.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       // Swells: brightest along the light path, almost gone at the edges.
       ctx.lineWidth = hair;

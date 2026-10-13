@@ -19,7 +19,7 @@ export function ProjectCard({ project }: { project: Project }) {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex h-(--card-h) w-(--card-w) flex-col overflow-hidden rounded-[14px] border border-line bg-surface/[0.96] p-4 transition duration-300 ease-out card-size hover:-translate-y-0.5 hover:border-ink/25 hover:bg-[#272622]/95 focus-visible:-translate-y-0.5 sm:p-5"
+        className="group flex h-(--card-h) w-(--card-w) flex-col overflow-hidden rounded-[14px] border border-line bg-surface/[0.96] p-4 transition duration-300 ease-out card-size hover:-translate-y-0.5 hover:border-ink/25 hover:bg-[#161c25]/95 focus-visible:-translate-y-0.5 sm:p-5"
       >
         {image ? (
           <div className="relative -mx-4 -mt-4 mb-3 h-[42%] overflow-hidden border-b border-line sm:-mx-5 sm:-mt-5">

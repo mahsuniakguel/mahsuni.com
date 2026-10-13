@@ -17,14 +17,14 @@ export default function Home() {
       <Sea horizonId={HORIZON_ID} />
 
       <header className="gutter flex flex-1 flex-col justify-center py-8 short:py-5">
-        <h1 className="font-display text-[clamp(2rem,min(4.8vw,7dvh),3.5rem)] leading-none font-bold tracking-[-0.03em]">
+        <h1 data-sea-avoid className="text-[clamp(2rem,min(4.8vw,7dvh),3.5rem)] leading-none font-bold tracking-[-0.03em]">
           {site.greeting}
         </h1>
-        <p className="mt-4 max-w-[38ch] text-base leading-relaxed text-pretty tracking-[-0.005em] text-muted sm:mt-5 sm:text-[1.0625rem] short:mt-3">
+        <p data-sea-avoid className="mt-4 max-w-[38ch] text-base leading-relaxed text-pretty tracking-[-0.005em] text-muted sm:mt-5 sm:text-[1.0625rem] short:mt-3">
           {site.tagline}
         </p>
         {socials.length > 0 && (
-          <nav aria-label="Social profiles" className="mt-5 sm:mt-7 short:mt-4">
+          <nav data-sea-avoid aria-label="Social profiles" className="mt-5 sm:mt-7 short:mt-4">
             <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
               {socials.map((s) => (
                 <li key={s.label}>

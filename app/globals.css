@@ -4,17 +4,17 @@
 @custom-variant short (@media (max-height: 720px));
 
 /*
-  Night sea. A warm charcoal sky over cool, deep water, split by one horizon.
+  Night sea. A blue-black sky over deep water that fades into it at the horizon.
   Text is the colour of moonlight; sea glass is used only for focus and "live".
 */
 :root {
-  --sky: #1b1a18;
-  --sea: #0f1518;
-  --surface: #22211e;
-  --ink: #ece6da;
-  --muted: #a39e94;
-  --faint: #75716a;
-  --line: rgb(236 230 218 / 0.1);
+  --sky: #080a0e;
+  --sea: #0a0f14;
+  --surface: #11161d;
+  --ink: #ebe8e1;
+  --muted: #989ca4;
+  --faint: #686d76;
+  --line: rgb(220 228 240 / 0.09);
   --glass: #9cc4b7;
 }
 
@@ -27,9 +27,8 @@
   --color-faint: var(--faint);
   --color-line: var(--line);
   --color-glass: var(--glass);
-  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
-  /* SF Pro on Apple devices, Inter everywhere else. */
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-inter), ui-sans-serif, sans-serif;
+  /* One typeface everywhere: SF Pro on Apple devices, Inter elsewhere. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-inter), ui-sans-serif, sans-serif;
 }
 
 @layer base {

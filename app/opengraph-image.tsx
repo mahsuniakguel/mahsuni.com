@@ -14,7 +14,7 @@ export default function OpengraphImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "#1b1a18",
+          background: "#080a0e",
           color: "#ece6da",
         }}
       >
@@ -28,12 +28,12 @@ export default function OpengraphImage() {
           }}
         >
           <div style={{ fontSize: 88, letterSpacing: "-0.03em", lineHeight: 1 }}>{site.name}</div>
-          <div style={{ marginTop: 24, fontSize: 30, lineHeight: 1.4, color: "#a39e94", maxWidth: 900 }}>
+          <div style={{ marginTop: 24, fontSize: 30, lineHeight: 1.4, color: "#989ca4", maxWidth: 900 }}>
             {site.tagline}
           </div>
         </div>
         <div style={{ height: 1, background: "rgba(236,230,218,0.3)" }} />
-        <div style={{ height: 170, background: "#0f1518" }} />
+        <div style={{ height: 170, background: "#0d1318" }} />
       </div>
     ),
     size,

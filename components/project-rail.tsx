@@ -74,7 +74,7 @@ export function ProjectRail({
   return (
     <section aria-labelledby="projects-title" className="relative">
       <div className="gutter flex items-center justify-between">
-        <h2 id="projects-title" className="text-sm text-muted">
+        <h2 id="projects-title" data-sea-avoid className="text-sm text-muted">
           {title}
         </h2>
         <div className={`-mr-2 flex gap-1 ${overflows ? "" : "invisible"}`}>

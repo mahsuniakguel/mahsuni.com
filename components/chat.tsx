@@ -289,8 +289,8 @@ export function Chat({
         <div className="prompts no-scrollbar -mx-1 mt-2 flex min-h-11 items-center gap-2 overflow-x-auto px-1 py-1.5">
           {!enabled ? (
             <p className="text-sm text-muted">
-              The chat isn&apos;t connected yet. Add <code className="text-ink">CHAT_API_KEY</code> to{" "}
-              <code className="text-ink">.env.local</code> to turn it on.
+              The chat isn&apos;t connected yet. Add <code className="font-sans font-medium text-ink">CHAT_API_KEY</code> to{" "}
+              <code className="font-sans font-medium text-ink">.env.local</code> to turn it on.
             </p>
           ) : hasConversation ? (
             !showPanel && (
