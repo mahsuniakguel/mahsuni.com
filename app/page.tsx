@@ -53,7 +53,7 @@ export default function Home() {
 
       <div className="min-h-6 flex-[0.55]" />
 
-      <div className="pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-8 short:sm:pb-4">
+      <div className="pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-14 short:sm:pb-8">
         <Chat
           enabled={chatEnabled}
           title={site.chat.title}

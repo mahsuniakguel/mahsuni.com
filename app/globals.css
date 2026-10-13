@@ -69,23 +69,6 @@
   padding-inline: var(--gutter);
 }
 
-/* Project cards shrink on small and short screens so everything fits. */
-.card-size {
-  --card-w: 15rem;
-  --card-h: 10.5rem;
-}
-@media (min-width: 640px) {
-  .card-size {
-    --card-w: 18rem;
-    --card-h: 12rem;
-  }
-}
-@media (min-width: 640px) and (max-height: 760px) {
-  .card-size {
-    --card-h: 10.5rem;
-  }
-}
-
 @keyframes rise {
   from {
     opacity: 0;

@@ -10,14 +10,14 @@ npm install
 npm run dev
 ```
 
-Without a key the site works and the chat shows a setup note instead of pretending to answer.
+Without a key the site works and the chat input stays disabled instead of pretending to answer.
 
 ## Edit content
 
 | What | Where |
 | --- | --- |
 | Name, tagline, chat copy, example questions | `content/site.ts` |
-| Projects | `content/projects.ts` (images go in `public/projects/`) |
+| Projects | `content/projects.ts` |
 | Social links | `content/socials.ts` |
 | What the chat knows about me | `content/profile.md` |
 | How the chat behaves | `lib/chat/system-prompt.ts` |

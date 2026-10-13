@@ -286,31 +286,28 @@ export function Chat({
           )}
         </form>
 
-        <div className="prompts no-scrollbar -mx-1 mt-2 flex min-h-11 items-center gap-2 overflow-x-auto px-1 py-1.5">
-          {!enabled ? (
-            <p className="text-sm text-muted">
-              The chat isn&apos;t connected yet. Add <code className="font-sans font-medium text-ink">CHAT_API_KEY</code> to{" "}
-              <code className="font-sans font-medium text-ink">.env.local</code> to turn it on.
-            </p>
-          ) : hasConversation ? (
-            !showPanel && (
-              <>
-                <button type="button" onClick={() => setOpen(true)} className={quietButton}>
-                  Show conversation
+        {enabled && (
+          <div className="no-scrollbar -mx-1 mt-2 flex min-h-11 items-center gap-2 overflow-x-auto px-1 py-1.5">
+            {hasConversation ? (
+              !showPanel && (
+                <>
+                  <button type="button" onClick={() => setOpen(true)} className={quietButton}>
+                    Show conversation
+                  </button>
+                  <button type="button" onClick={startOver} className={quietButton}>
+                    New conversation
+                  </button>
+                </>
+              )
+            ) : (
+              prompts.map((prompt) => (
+                <button key={prompt} type="button" onClick={() => ask(prompt)} className={quietButton}>
+                  {prompt}
                 </button>
-                <button type="button" onClick={startOver} className={quietButton}>
-                  New conversation
-                </button>
-              </>
-            )
-          ) : (
-            prompts.map((prompt) => (
-              <button key={prompt} type="button" onClick={() => ask(prompt)} className={quietButton}>
-                {prompt}
-              </button>
-            ))
-          )}
-        </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </section>
   );
