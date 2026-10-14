@@ -244,6 +244,10 @@ export function Sea({ horizonId }: { horizonId: string }) {
     };
 
     const draw = () => {
+      // A route kept hidden after navigating away has no size; the resize
+      // observer draws again once it's shown.
+      if (!width || !height) return;
+
       const anchor = document.getElementById(horizonId);
       const top = anchor
         ? anchor.getBoundingClientRect().top - parent.getBoundingClientRect().top

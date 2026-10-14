@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Chat } from "@/components/chat";
 import { ProjectCard } from "@/components/project-card";
 import { ProjectRail } from "@/components/project-rail";
@@ -5,9 +6,13 @@ import { Sea } from "@/components/sea";
 import { projects } from "@/content/projects";
 import { site } from "@/content/site";
 import { socials } from "@/content/socials";
+import { story } from "@/content/story";
 import { getChatConfig } from "@/lib/chat/provider";
 
 const HORIZON_ID = "horizon";
+
+const navLink =
+  "rounded text-ink/80 underline decoration-ink/20 underline-offset-[5px] transition-colors hover:text-ink hover:decoration-ink/60";
 
 export default function Home() {
   const chatEnabled = getChatConfig() !== null;
@@ -23,24 +28,22 @@ export default function Home() {
         <p data-sea-avoid className="mt-4 max-w-[38ch] text-base leading-relaxed text-pretty tracking-[-0.005em] text-muted sm:mt-5 sm:text-[1.0625rem] short:mt-3">
           {site.tagline}
         </p>
-        {socials.length > 0 && (
-          <nav data-sea-avoid aria-label="Social profiles" className="mt-5 sm:mt-7 short:mt-4">
-            <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-              {socials.map((s) => (
-                <li key={s.label}>
-                  <a
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer me"
-                    className="rounded text-ink/80 underline decoration-ink/20 underline-offset-[5px] transition-colors hover:text-ink hover:decoration-ink/60"
-                  >
-                    {s.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        )}
+        <nav data-sea-avoid aria-label="Links" className="mt-5 sm:mt-7 short:mt-4">
+          <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+            {socials.map((s) => (
+              <li key={s.label}>
+                <a href={s.href} target="_blank" rel="noopener noreferrer me" className={navLink}>
+                  {s.label}
+                </a>
+              </li>
+            ))}
+            <li>
+              <Link href="/story" className={navLink}>
+                {story.title}
+              </Link>
+            </li>
+          </ul>
+        </nav>
       </header>
 
       {projects.length > 0 && (
