@@ -1,6 +1,8 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { HORIZON_ID } from "./horizon";
 import { boatBounds, drawBoat } from "./sea-boat";
 
 const SKY_TOP = "#06080b";
@@ -13,6 +15,8 @@ const LIGHT = "240 234 222";
 // Where the moon and its reflection sit, as a fraction of the width.
 const PATH_X = 0.7;
 const SWELLS = 11;
+// Where the horizon sits, as a fraction of the height, until a page marks it.
+const DEFAULT_HORIZON = 0.62;
 
 type Star = {
   u: number; // horizontal position, 0–1
@@ -72,10 +76,20 @@ function light(alpha: number) {
   return `rgb(${LIGHT} / ${Math.max(0, alpha).toFixed(3)})`;
 }
 
-// Draws the night sea below the element with id `horizonId`: slow swells and
-// moonlight glinting on the water. Purely decorative.
-export function Sea({ horizonId }: { horizonId: string }) {
+// The visible horizon marker. Pages kept hidden after navigating away still
+// have theirs in the document, but it takes up no space.
+function findAnchor() {
+  const el = document.getElementById(HORIZON_ID);
+  return el && el.getClientRects().length > 0 ? el : null;
+}
+
+// Draws the night sea below the horizon marker: slow swells and moonlight
+// glinting on the water. Rendered once in the root layout so it stays put
+// across pages. Purely decorative.
+export function Sea() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const redrawRef = useRef<() => void>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -93,6 +107,13 @@ export function Sea({ horizonId }: { horizonId: string }) {
     let height = 0;
     let dpr = 1;
     let horizon = -1;
+    // Where the horizon is heading, and where it rests on pages without a marker.
+    let goal = -1;
+    let rest = DEFAULT_HORIZON;
+    let railDepth = 48;
+    let lastAnchor: Element | null = null;
+    let gliding = false;
+    let lastDraw = 0;
     let glints: Glint[] = [];
     let stars: Star[] = [];
     // Content the scene keeps clear of: no stars behind text, no boat over it.
@@ -195,9 +216,12 @@ export function Sea({ horizonId }: { horizonId: string }) {
 
     // Measures content marked data-sea-avoid, then places the boat in the open
     // water below the projects, where it won't touch any of it.
-    const measureLayout = () => {
+    const measureLayout = (anchor: Element | null) => {
       const frame = parent.getBoundingClientRect();
-      avoid = [...document.querySelectorAll("[data-sea-avoid]")].map((el) => {
+      const visible = [...document.querySelectorAll("[data-sea-avoid]")].filter(
+        (el) => el.getClientRects().length > 0,
+      );
+      avoid = visible.map((el) => {
         const r = el.getBoundingClientRect();
         return {
           left: r.left - frame.left,
@@ -208,11 +232,12 @@ export function Sea({ horizonId }: { horizonId: string }) {
       });
 
       boat = null;
-      const rail = document.getElementById(horizonId)?.parentElement;
-      if (!rail || width < 900) return;
+      if (width < 900) return;
 
-      const origin = frame.top;
-      const railBottom = rail.getBoundingClientRect().bottom - origin;
+      // Without a rail on the page, keep the boat where it was beside it.
+      const rail = anchor?.parentElement;
+      if (rail) railDepth = rail.getBoundingClientRect().bottom - frame.top - horizon;
+      const railBottom = horizon + railDepth;
       const scale = Math.min(Math.max(width / 1440, 0.8), 1.15);
       const x = width * (PATH_X + 0.12);
       const rise = -boatBounds(0, 0, scale).top;
@@ -248,14 +273,37 @@ export function Sea({ horizonId }: { horizonId: string }) {
       // observer draws again once it's shown.
       if (!width || !height) return;
 
-      const anchor = document.getElementById(horizonId);
-      const top = anchor
-        ? anchor.getBoundingClientRect().top - parent.getBoundingClientRect().top
-        : height * 0.55;
-      if (Math.abs(top - horizon) > 0.5) {
-        horizon = top;
+      const now = performance.now();
+      const dt = Math.min(now - lastDraw, 100) / 1000;
+      lastDraw = now;
+
+      const anchor = findAnchor();
+      const changedPage = anchor !== lastAnchor;
+      lastAnchor = anchor;
+      if (anchor) {
+        goal = anchor.getBoundingClientRect().top - parent.getBoundingClientRect().top;
+        rest = goal / height;
+      } else {
+        goal = rest * height;
+      }
+
+      // Glide to a new page's horizon; follow layout changes and scrolling directly.
+      if (changedPage && horizon >= 0 && motion.matches) gliding = true;
+      let next = goal;
+      if (gliding) {
+        next = horizon + (goal - horizon) * (1 - Math.exp(-dt * 7));
+        if (Math.abs(goal - next) < 0.5) {
+          next = goal;
+          gliding = false;
+        }
+      }
+
+      if (Math.abs(next - horizon) > 0.5) {
+        horizon = next;
         paintBackdrop();
-        measureLayout();
+        measureLayout(anchor);
+      } else if (changedPage) {
+        measureLayout(anchor);
       }
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -365,6 +413,7 @@ export function Sea({ horizonId }: { horizonId: string }) {
     draw();
     canvas.dataset.ready = "";
     start();
+    redrawRef.current = draw;
 
     // The horizon moves whenever the layout around it does.
     const observer = new ResizeObserver(() => {
@@ -382,14 +431,21 @@ export function Sea({ horizonId }: { horizonId: string }) {
       observer.disconnect();
       document.removeEventListener("visibilitychange", start);
       motion.removeEventListener("change", start);
+      redrawRef.current = null;
     };
-  }, [horizonId]);
+  }, []);
+
+  // Without animation nothing redraws on its own, so catch up after navigating.
+  useEffect(() => {
+    redrawRef.current?.();
+  }, [pathname]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden
-      className="pointer-events-none absolute inset-0 -z-10 h-full w-full opacity-0 transition-opacity duration-[1600ms] ease-out data-ready:opacity-100"
-    />
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-[1600ms] ease-out data-ready:opacity-100"
+      />
+    </div>
   );
 }

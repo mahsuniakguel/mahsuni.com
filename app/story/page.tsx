@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Sea } from "@/components/sea";
 import { site } from "@/content/site";
 import { story } from "@/content/story";
-
-const HORIZON_ID = "story-horizon";
 
 const title = `${story.title} · ${site.name}`;
 
@@ -20,23 +17,25 @@ export const metadata: Metadata = {
 export default function StoryPage() {
   return (
     <main className="relative isolate min-h-dvh">
-      {/* The sea stays put while the story scrolls over it. */}
-      <div aria-hidden className="fixed inset-0 -z-10">
-        <Sea horizonId={HORIZON_ID} />
-        <div className="absolute inset-x-0 top-[62%]">
-          <div id={HORIZON_ID} />
-        </div>
-      </div>
-
-      <article className="gutter pt-10 pb-[max(4rem,env(safe-area-inset-bottom))] sm:pt-14 sm:pb-28">
+      <article className="gutter relative pb-[max(4rem,env(safe-area-inset-bottom))] sm:pb-28">
         <Link
           href="/"
-          className="rounded text-sm text-muted transition-colors hover:text-ink"
+          aria-label="Back"
+          className="absolute top-[calc(max(var(--page-top)/2,var(--page-top)-3.5rem)-1rem)] left-[calc(var(--gutter)-0.6875rem)] grid size-8 place-items-center rounded-full text-muted transition-colors hover:bg-ink/[0.06] hover:text-ink"
         >
-          ← Back
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+            <path
+              d="M13 8H3M7.5 3.5 3 8l4.5 4.5"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </Link>
 
-        <header className="mt-16 sm:mt-24">
+        {/* Same place as the homepage heading. The arrow sits in the space above it. */}
+        <header className="page-top">
           <h1 className="text-[clamp(2rem,min(4.8vw,7dvh),3.5rem)] leading-none font-bold tracking-[-0.03em]">
             {story.title}
           </h1>

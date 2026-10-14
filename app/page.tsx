@@ -2,14 +2,11 @@ import Link from "next/link";
 import { Chat } from "@/components/chat";
 import { ProjectCard } from "@/components/project-card";
 import { ProjectRail } from "@/components/project-rail";
-import { Sea } from "@/components/sea";
 import { projects } from "@/content/projects";
 import { site } from "@/content/site";
 import { socials } from "@/content/socials";
 import { story } from "@/content/story";
 import { getChatConfig } from "@/lib/chat/provider";
-
-const HORIZON_ID = "horizon";
 
 const navLink =
   "rounded text-ink/80 underline decoration-ink/20 underline-offset-[5px] transition-colors hover:text-ink hover:decoration-ink/60";
@@ -19,9 +16,9 @@ export default function Home() {
 
   return (
     <main className="relative isolate flex min-h-dvh flex-col overflow-hidden">
-      <Sea horizonId={HORIZON_ID} />
-
-      <header className="gutter flex flex-1 flex-col justify-center py-8 short:py-5">
+      {/* Shifted down to --page-top rather than padded, so the header keeps its
+          size and the projects and horizon below stay where they are. */}
+      <header className="gutter relative top-[calc(var(--page-top)-2rem)] flex flex-1 flex-col py-8 short:top-[calc(var(--page-top)-1.25rem)] short:py-5">
         <h1 data-sea-avoid className="text-[clamp(2rem,min(4.8vw,7dvh),3.5rem)] leading-none font-bold tracking-[-0.03em]">
           {site.greeting}
         </h1>
@@ -47,7 +44,7 @@ export default function Home() {
       </header>
 
       {projects.length > 0 && (
-        <ProjectRail title={site.projectsTitle} horizonId={HORIZON_ID}>
+        <ProjectRail title={site.projectsTitle}>
           {projects.map((project) => (
             <ProjectCard key={project.url} project={project} />
           ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { HORIZON_ID } from "./horizon";
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
   return (
@@ -20,11 +21,9 @@ function Chevron({ direction }: { direction: "left" | "right" }) {
 // only when the row overflows; swiping, trackpads, and Tab work regardless.
 export function ProjectRail({
   title,
-  horizonId,
   children,
 }: {
   title: string;
-  horizonId: string;
   children: ReactNode;
 }) {
   const listRef = useRef<HTMLUListElement>(null);
@@ -101,7 +100,7 @@ export function ProjectRail({
 
       <div className="relative mt-3">
         {/* Marks where the horizon sits; the sea is drawn from here down. */}
-        <div id={horizonId} aria-hidden className="absolute inset-x-0 top-1/2 h-px" />
+        <div id={HORIZON_ID} aria-hidden className="absolute inset-x-0 top-1/2 h-px" />
         <ul
           ref={listRef}
           className="gutter no-scrollbar relative flex snap-x snap-mandatory gap-8 overflow-x-auto py-1.5 sm:gap-10"

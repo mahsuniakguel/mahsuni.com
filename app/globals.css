@@ -16,6 +16,10 @@
   --faint: #686d76;
   --line: rgb(220 228 240 / 0.09);
   --glass: #9cc4b7;
+  /* How far every page's heading sits from the top, so it stays put when
+     switching pages. Roughly where centring put it on the homepage. svh, not
+     dvh, so it doesn't shift as mobile browser bars collapse. */
+  --page-top: max(2rem, calc(29svh - 6.5rem));
 }
 
 @theme inline {
@@ -39,6 +43,8 @@
 
   body {
     background: var(--sky);
+    /* Keeps the sea, drawn below everything, in front of this background. */
+    isolation: isolate;
     color: var(--ink);
     font-family: var(--font-sans);
     text-rendering: optimizeLegibility;
@@ -61,6 +67,10 @@
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+@utility page-top {
+  padding-top: var(--page-top);
 }
 
 /* Lines up content with the page column while letting rows bleed to the edge. */
