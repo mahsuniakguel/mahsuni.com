@@ -14,7 +14,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
-  title: site.name,
+  title: site.title,
   description: site.description,
   alternates: { canonical: "/" },
   openGraph: {

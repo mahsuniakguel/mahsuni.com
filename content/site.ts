@@ -1,6 +1,8 @@
 // Site-wide identity. Used by the homepage, metadata, and the social preview image.
 export const site = {
   name: "Mahsuni Akgul",
+  // What the browser tab shows.
+  title: "mahsuni",
   url: "https://mahsuni.com",
   // The large heading on the homepage.
   greeting: "hi I'm mahsuni.",

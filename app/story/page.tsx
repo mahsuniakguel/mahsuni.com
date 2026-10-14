@@ -6,7 +6,7 @@ import { story } from "@/content/story";
 const title = `${story.title} · ${site.name}`;
 
 export const metadata: Metadata = {
-  title,
+  title: site.title,
   description: story.intro,
   alternates: { canonical: "/story" },
   // Replaces the layout's openGraph and twitter objects as a whole, not field by field.
