@@ -104,7 +104,7 @@ export function ProjectRail({
         <div id={horizonId} aria-hidden className="absolute inset-x-0 top-1/2 h-px" />
         <ul
           ref={listRef}
-          className="gutter no-scrollbar relative flex snap-x snap-mandatory gap-3 overflow-x-auto py-1.5 sm:gap-4"
+          className="gutter no-scrollbar relative flex snap-x snap-mandatory gap-8 overflow-x-auto py-1.5 sm:gap-10"
           style={{
             scrollPaddingInline: "var(--gutter)",
             maskImage: `linear-gradient(to right, ${mask})`,
