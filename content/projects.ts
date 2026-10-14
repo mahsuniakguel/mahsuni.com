@@ -5,6 +5,8 @@
 //
 // - `status`  optional short state shown on the card, e.g. "Live", "Beta",
 //             "In progress". "Live" gets a small lit marker.
+// - `logo`    optional path to a square logo in /public, e.g.
+//             "/projects/name.svg". Without one, the first letter is shown.
 //
 // The entries below are placeholders. Replace them with your real projects.
 export type Project = {
@@ -12,6 +14,7 @@ export type Project = {
   description: string;
   url: string;
   status?: string;
+  logo?: string;
 };
 
 export const projects: Project[] = [
